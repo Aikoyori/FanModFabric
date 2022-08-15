@@ -9,6 +9,7 @@ import net.minecraft.client.render.entity.EntityRenderer;
 import net.minecraft.client.render.entity.EntityRendererFactory;
 import net.minecraft.client.util.math.MatrixStack;
 import net.minecraft.util.Identifier;
+import net.minecraft.util.math.MathHelper;
 import net.minecraft.util.math.Vec3f;
 import xyz.aikoyori.bigfan.Bigfan;
 
@@ -34,7 +35,7 @@ public class FanEntityRenderer extends EntityRenderer<FanEntity> {
         //RenderSystem.setShaderColor(1, 1, 1, 1);
 
         matrices.multiply(Vec3f.POSITIVE_Y.getDegreesQuaternion(-entity.getYaw(tickDelta)+180f));
-        entityModel.setSwingProgressForTwistingFace(entity.getPrevSwingProg(), entity.getSwingingProgress(),tickDelta);
+        entityModel.setSwingProgressForTwistingFace(entity.getPrevSwingProg(), entity.getSwingingProgress(),tickDelta,-entity.getPitch()* MathHelper.PI/180.0f);
         entityModel.setBladeRotation(entity.getPrevBladeRot(),entity.getBladeRotation(),tickDelta);
         entityModel.setPowerButtonPress(entity.getFanPower());
         entityModel.render(matrices,vertexConsumers.getBuffer(RenderLayer.getEntityTranslucentCull(TX)),light, OverlayTexture.DEFAULT_UV,1.0f,1.0f,1.0f,1.0f);

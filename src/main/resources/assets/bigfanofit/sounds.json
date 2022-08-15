@@ -1,0 +1,8 @@
+{
+  "fan_hums": {
+    "subtitle": "subtitles.bigfanofit.fan_hum",
+    "sounds": [
+      "bigfanofit:fan"
+    ]
+  }
+}

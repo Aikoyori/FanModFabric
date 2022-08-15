@@ -1,0 +1,32 @@
+{
+  "type": "minecraft:crafting_shaped",
+  "pattern": [
+    "#HQ",
+    "HIH",
+    "RHG"
+  ],
+  "key": {
+    "#": {
+      "item": "minecraft:popped_chorus_fruit"
+    },
+    "H": {
+      "item": "minecraft:heavy_weighted_pressure_plate"
+    },
+    "Q": {
+      "item": "minecraft:quartz"
+    },
+    "I": {
+      "item": "minecraft:iron_block"
+    },
+    "R": {
+      "item": "minecraft:redstone_block"
+    },
+    "G": {
+      "item": "minecraft:gold_block"
+    }
+  },
+  "result": {
+    "item": "bigfanofit:fan",
+    "count": 1
+  }
+}

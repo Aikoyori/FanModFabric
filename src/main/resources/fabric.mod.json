@@ -2,12 +2,15 @@
   "schemaVersion": 1,
   "id": "bigfanofit",
   "version": "${version}",
-  "name": "I am a Big Fan of it!",
-  "description": "",
-  "authors": [],
-  "contact": {},
+  "name": "Big Fan of it",
+  "description": "Adds a functional fan based on real life fan!",
+  "authors": ["Aikoyori"],
+  "contact": {"homepage": "https://modrinth.com/mod/bigfanofit",
+    "sources": "https://github.com/Aikoyori/FanModFabric",
+    "issues": "https://github.com/Aikoyori/FanModFabric/issues"
+  },
   "license": "MIT",
-  "icon": "assets/bigfan/icon.png",
+  "icon": "assets/bigfanofit/icon.png",
   "environment": "*",
   "entrypoints": {
     "client": [

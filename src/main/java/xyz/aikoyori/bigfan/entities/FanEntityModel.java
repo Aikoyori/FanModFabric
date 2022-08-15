@@ -37,11 +37,11 @@ public class FanEntityModel extends EntityModel<Entity> {
 
 		ModelPartData button4 = powersbutton.addChild("button0", ModelPartBuilder.create().uv(6, 7).cuboid(-0.5F, -0.5F, -1.5F, 1.0F, 1.0F, 1.0F, new Dilation(0.0F)), ModelTransform.pivot(3.0F, -0.25F, 0.5F));
 
-		ModelPartData twisty = fan.addChild("twisty", ModelPartBuilder.create().uv(28, 28).cuboid(-2.0F, 9.0F, -4.0F, 4.0F, 4.0F, 8.0F, new Dilation(0.0F)), ModelTransform.pivot(0.0F, 0.0F, 0.0F));
+		ModelPartData twisty = fan.addChild("twisty", ModelPartBuilder.create().uv(28, 28).cuboid(-2.0F, 0.0F, -5.5F, 4.0F, 4.0F, 8.0F, new Dilation(0.0F)), ModelTransform.pivot(0.0F, 9.0F, 1.5F));
 
-		ModelPartData swingtoggle = twisty.addChild("swingtoggle", ModelPartBuilder.create().uv(28, 20).cuboid(-0.5F, 12.0F, 2.5F, 1.0F, 2.0F, 1.0F, new Dilation(0.0F)), ModelTransform.pivot(0.0F, 0.0F, 0.0F));
+		ModelPartData bone = twisty.addChild("bone", ModelPartBuilder.create().uv(28, 20).cuboid(-0.5F, 12.0F, 2.5F, 1.0F, 2.0F, 1.0F, new Dilation(0.0F)), ModelTransform.pivot(0.0F, -9.0F, -1.5F));
 
-		ModelPartData face = twisty.addChild("face", ModelPartBuilder.create().uv(0, 7).cuboid(-1.0F, 9.75F, -6.5F, 2.0F, 2.0F, 2.0F, new Dilation(0.0F)), ModelTransform.pivot(0.0F, 0.25F, 0.0F));
+		ModelPartData face = twisty.addChild("face", ModelPartBuilder.create().uv(0, 7).cuboid(-1.0F, 9.75F, -6.5F, 2.0F, 2.0F, 2.0F, new Dilation(0.0F)), ModelTransform.pivot(0.0F, -8.75F, -1.5F));
 
 		ModelPartData grills = face.addChild("grills", ModelPartBuilder.create().uv(0, 26).cuboid(-7.0F, -7.0F, -2.0F, 14.0F, 14.0F, 0.0F, new Dilation(0.0F))
 				.uv(0, 12).cuboid(-7.0F, -7.0F, 2.0F, 14.0F, 14.0F, 0.0F, new Dilation(0.0F))
@@ -63,9 +63,10 @@ public class FanEntityModel extends EntityModel<Entity> {
 	}
 	@Override
 	public void setAngles(Entity entity, float limbSwing, float limbSwingAmount, float ageInTicks, float netHeadYaw, float headPitch) {
+
 	}
-	public void setSwingProgressForTwistingFace(float prevRotationProgress, float rotationProgress, float deltaTicks) {
-		fan.getChild("twisty").setAngles(0f,(float)(MathHelper.sin(((float)(MathHelper.lerp(deltaTicks,prevRotationProgress,rotationProgress)*Math.PI*2.0f)))*(Math.PI/4.0f)),0f);
+	public void setSwingProgressForTwistingFace(float prevRotationProgress, float rotationProgress, float deltaTicks,float pitch) {
+		fan.getChild("twisty").setAngles(pitch,(float)(MathHelper.sin(((float)(MathHelper.lerp(deltaTicks,prevRotationProgress,rotationProgress)*Math.PI*2.0f)))*(Math.PI/4.0f)),0f);
 	}
 
 	public void setPowerButtonPress(int powerLevel) {

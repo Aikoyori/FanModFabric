@@ -1,5 +1,10 @@
 package xyz.aikoyori.bigfan.entities;
 
+import net.fabricmc.fabric.api.registry.FlammableBlockRegistry;
+import net.minecraft.block.AbstractFireBlock;
+import net.minecraft.block.Blocks;
+import net.minecraft.block.FireBlock;
+import net.minecraft.block.FluidBlock;
 import net.minecraft.entity.Entity;
 import net.minecraft.entity.EntityType;
 import net.minecraft.entity.LivingEntity;
@@ -14,17 +19,63 @@ import net.minecraft.network.packet.s2c.play.EntitySpawnS2CPacket;
 import net.minecraft.network.packet.s2c.play.EntityVelocityUpdateS2CPacket;
 import net.minecraft.particle.ParticleTypes;
 import net.minecraft.server.network.ServerPlayerEntity;
+import net.minecraft.tag.FluidTags;
+import net.minecraft.util.hit.BlockHitResult;
 import net.minecraft.util.hit.EntityHitResult;
 import net.minecraft.util.hit.HitResult;
+import net.minecraft.util.math.BlockPos;
 import net.minecraft.util.math.Vec3d;
 import net.minecraft.world.World;
+import xyz.aikoyori.bigfan.Bigfan;
+
+import java.util.UUID;
+
+import static xyz.aikoyori.bigfan.utils.FanHelper.getOutlineCollision;
 
 public class FanWindEntity extends Entity {
     private static final TrackedData<Float> LIFE = DataTracker.registerData(FanWindEntity.class, TrackedDataHandlerRegistry.FLOAT);
+    private static final TrackedData<Float> FAN_ROT_SPD = DataTracker.registerData(FanWindEntity.class, TrackedDataHandlerRegistry.FLOAT);
+    private static final TrackedData<Boolean> ON_FIRE = DataTracker.registerData(FanWindEntity.class, TrackedDataHandlerRegistry.BOOLEAN);
     public FanWindEntity(EntityType<?> type, World world) {
         super(type, world);
     }
 
+    public FanEntity getFanOwner() {
+        return fanOwner;
+    }
+
+    public void setFanOwner(FanEntity fanOwner) {
+        this.fanOwner = fanOwner;
+    }
+
+    public void setFanRotSpd(float fanRotSpd) {
+        getDataTracker().set(FAN_ROT_SPD,fanRotSpd);
+    }
+    public float getFanRotSpd() {
+        return getDataTracker().get(FAN_ROT_SPD);
+    }
+
+    FanEntity fanOwner;
+    public UUID getFanHolder() {
+        return fanHolder;
+    }
+
+    public void setFanHolder(UUID fanHolder) {
+        this.fanHolder = fanHolder;
+    }
+
+    public UUID fanHolder = null;
+
+    public int getFanPowerLevel() {
+        return fanPowerLevel;
+    }
+
+    public void setFanPowerLevel(int fanPowerLevel) {
+        this.fanPowerLevel = fanPowerLevel;
+    }
+
+    public int fanPowerLevel = 0;
+    int particleType=0;
     @Override
     public boolean shouldRender(double distance) {
         return false;
@@ -36,6 +87,13 @@ public class FanWindEntity extends Entity {
     public float getLife(){
         return this.dataTracker.get(LIFE);
     }
+    public void setWindOnFire(boolean life){
+        this.dataTracker.set(ON_FIRE,life);
+    }
+    public boolean getWindOnFire(){
+        return this.dataTracker.get(ON_FIRE);
+    }
+
     protected boolean canHit(Entity entity) {
         if (!entity.isSpectator() && entity.isAlive() && entity.canHit() && !(entity instanceof FanEntity)&& !(entity instanceof FanWindEntity)) {
             return true;
@@ -48,17 +106,100 @@ public class FanWindEntity extends Entity {
     public void tick() {
         super.tick();
         this.setPosition(this.getPos().add(this.getVelocity()));
+        // TODO : ADD BUBBLES INSTEAD OF CLOUD WHEN UNDERWATER
+        // TODO : ADD FIRE TYPE THAT HURTS :troll:
+        // TODO : EXTINGUISH FIRE IF WIND IS NOT FIRE OR IS OF WATER TYPE
+        if(isSubmergedIn(FluidTags.LAVA))
+        {
+            setWindOnFire(true);
+        }
 
-        HitResult hitResult = ProjectileUtil.getCollision(this, this::canHit);
+        if(isSubmergedIn(FluidTags.WATER))
+        {
+
+            setWindOnFire(false);
+            particleType=2;
+        }
+        else{
+
+            if(getWindOnFire())
+                particleType = 1;
+            else
+                particleType=0;
+        }
+
+
+
+        Vec3d norm = getVelocity().normalize().multiply(particleType==0?0.3:0.03);
+        norm = norm.multiply(getFanRotSpd()/10.0f);
+        Vec3d spwnL = new Vec3d(getX()+(random.nextFloat()-0.5f)*0.2,getY()+(random.nextFloat()-0.5f)*0.2,getZ()+(random.nextFloat()-0.5f)*0.2);
+
+        if(particleType==0)
+        spwnL = spwnL.add(norm.multiply(-10f));
+        if(this.random.nextFloat()>0.85f+0.02f*getFanPowerLevel())
+        world.addParticle(
+                switch (particleType)
+                        {
+                            case 1 -> ParticleTypes.FLAME;
+                            case 2 -> ParticleTypes.BUBBLE;
+                            default -> Bigfan.LEAF_BLOW;
+                        },spwnL.getX(),spwnL.getY(),spwnL.getZ(),norm.getX(),norm.getY(),norm.getZ());
+
+        HitResult hitResult2 = ProjectileUtil.getCollision(this, this::canHit);
+        HitResult hitResult = getOutlineCollision(this, this::canHit);
         if(hitResult.getType()== HitResult.Type.BLOCK)
         {
+            BlockHitResult hitB = (BlockHitResult) hitResult;
+            if(getWindOnFire())
+            {
+
+                if(FlammableBlockRegistry.getInstance(Blocks.FIRE).get(world.getBlockState(hitB.getBlockPos()).getBlock()).getBurnChance()>0)
+                {
+                    BlockPos sthin = new BlockPos(
+                            hitB.getBlockPos().getX()+hitB.getSide().getVector().getX()
+                            ,hitB.getBlockPos().getY()+hitB.getSide().getVector().getY()
+                            ,hitB.getBlockPos().getZ()+hitB.getSide().getVector().getZ()
+                    );
+                    world.setBlockState(sthin,Blocks.FIRE.getDefaultState());
+                }
+            }
+
+
+            if(world.getBlockState(hitB.getBlockPos()).getBlock() instanceof AbstractFireBlock)
+            {
+                if(!this.getWindOnFire()){
+                    world.setBlockState(hitB.getBlockPos(),Blocks.AIR.getDefaultState());
+                }
+            }
+
+        }
+        if(hitResult2.getType()== HitResult.Type.BLOCK)
+        {
             setLife(0);
+
         }
         if(hitResult.getType()== HitResult.Type.ENTITY)
         {
             EntityHitResult hitE = (EntityHitResult) hitResult;
             Vec3d addVel = new Vec3d(this.getVelocity().x,this.getVelocity().y,this.getVelocity().z).multiply(0.5);
-            hitE.getEntity().addVelocity(addVel.getX(),addVel.getY(),addVel.getZ());
+            if(getFanHolder()!=null && hitE.getEntity().getUuid().equals(getFanHolder()))
+            {
+
+            }
+                else
+            {
+
+                hitE.getEntity().addVelocity(addVel.getX(),addVel.getY(),addVel.getZ());
+            }
+            if(getWindOnFire())
+            {
+                hitE.getEntity().setFireTicks(20);
+            }
+            else
+            {
+                hitE.getEntity().setFireTicks(-1);
+
+            }
             hitE.getEntity().velocityModified = true;
             if(hitE.getEntity() instanceof LivingEntity){
                 LivingEntity target = (LivingEntity) hitE.getEntity();
@@ -78,7 +219,8 @@ public class FanWindEntity extends Entity {
         {
             this.setLife(this.getLife()-1);
         }
-        world.addParticle(ParticleTypes.CLOUD,getX(),getY(),getZ(),0,0,0);
+
+
         updatePositionAndAngles(this.getX(),this.getY(),this.getZ(),this.getYaw(),this.getPitch());
     }
 
@@ -95,7 +237,10 @@ public class FanWindEntity extends Entity {
 
     @Override
     protected void initDataTracker() {
+
         this.getDataTracker().startTracking(LIFE,0f);
+        this.getDataTracker().startTracking(ON_FIRE,false);
+        this.getDataTracker().startTracking(FAN_ROT_SPD,0.0f);
     }
 
     @Override

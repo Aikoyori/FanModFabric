@@ -54,6 +54,7 @@ public class FanItem extends Item {
             FanEntity fan = new FanEntity(Bigfan.FAN_ENTITY,world);
             fan.setPos(positive.getX()+0.5,positive.getY()+0.1,positive.getZ()+0.5);
             fan.setYaw(context.getPlayerYaw()+(context.getPlayer().isSneaking()?0f:180f));
+            fan.setPitch(context.getPlayer().getPitch()*(context.getPlayer().isSneaking()?1:-1));
             context.getWorld().spawnEntity(fan);
             context.getPlayer().getStackInHand(context.getHand()).decrement(1);
             return ActionResult.SUCCESS;

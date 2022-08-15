@@ -1,4 +1,5 @@
 {
   "entity.bigfanofit.fan" : "Fan",
-  "item.bigfanofit.fan" : "Fan"
+  "item.bigfanofit.fan" : "Fan",
+  "subtitles.bigfanofit.fan_hum" : "Fan Hums"
 }

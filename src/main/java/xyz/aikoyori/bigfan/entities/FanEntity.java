@@ -1,6 +1,5 @@
 package xyz.aikoyori.bigfan.entities;
 
-import net.minecraft.block.Block;
 import net.minecraft.entity.*;
 import net.minecraft.entity.damage.DamageSource;
 import net.minecraft.entity.data.DataTracker;
@@ -12,22 +11,22 @@ import net.minecraft.item.ItemStack;
 import net.minecraft.nbt.NbtCompound;
 import net.minecraft.network.Packet;
 import net.minecraft.network.packet.s2c.play.EntitySpawnS2CPacket;
-import net.minecraft.particle.ParticleEffect;
-import net.minecraft.particle.ParticleTypes;
-import net.minecraft.sound.SoundCategory;
+import net.minecraft.network.packet.s2c.play.EntityVelocityUpdateS2CPacket;
+import net.minecraft.server.network.ServerPlayerEntity;
+import net.minecraft.server.world.ServerWorld;
 import net.minecraft.sound.SoundEvents;
 import net.minecraft.util.ActionResult;
 import net.minecraft.util.Hand;
-import net.minecraft.util.hit.HitResult;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.util.math.MathHelper;
 import net.minecraft.util.math.Vec3d;
 import net.minecraft.world.GameRules;
-import net.minecraft.world.RaycastContext;
 import net.minecraft.world.World;
 import org.jetbrains.annotations.Nullable;
 import xyz.aikoyori.bigfan.Bigfan;
-import xyz.aikoyori.bigfan.utils.FanHelper;
+
+import java.util.Optional;
+import java.util.UUID;
 
 public class FanEntity extends Entity {
     private static final TrackedData<Boolean> SWINGING =  DataTracker.registerData(FanEntity.class, TrackedDataHandlerRegistry.BOOLEAN);
@@ -37,9 +36,13 @@ public class FanEntity extends Entity {
     private static final TrackedData<Float> FAN_BLADE_ROTATION =  DataTracker.registerData(FanEntity.class, TrackedDataHandlerRegistry.FLOAT);
     private static final TrackedData<Float> FAN_BLADE_ROTATION_SPEED =  DataTracker.registerData(FanEntity.class, TrackedDataHandlerRegistry.FLOAT);
     private static final TrackedData<Float> FAN_BLADE_ROTATION_ACCELERATION =  DataTracker.registerData(FanEntity.class, TrackedDataHandlerRegistry.FLOAT);
+    private static final TrackedData<Boolean> IS_BEING_HELD =  DataTracker.registerData(FanEntity.class, TrackedDataHandlerRegistry.BOOLEAN);
+    private static final TrackedData<Optional<UUID>> HELD_BY =  DataTracker.registerData(FanEntity.class, TrackedDataHandlerRegistry.OPTIONAL_UUID);
+    private UUID heldBy;
 
     private final TrackedPosition trackedPosition;
     private float prevBladeRot;
+    private int hitTimer = 0;
     private float prevSwingProg = 0.0f;
     private float rotSpeedLimit = 0.0f;
     public FanEntity(EntityType<?> type, World world) {
@@ -58,6 +61,8 @@ public class FanEntity extends Entity {
         this.dataTracker.startTracking(FAN_BLADE_ROTATION, 0.00f);
         this.dataTracker.startTracking(FAN_BLADE_ROTATION_SPEED, 0.00f);
         this.dataTracker.startTracking(FAN_BLADE_ROTATION_ACCELERATION, 0.00f);
+        this.dataTracker.startTracking(IS_BEING_HELD, false);
+        this.dataTracker.startTracking(HELD_BY, null);
 
 
     }
@@ -176,6 +181,21 @@ public class FanEntity extends Entity {
         this.setPosition(d, e, f);
     }
 
+    public boolean isBeingHeld() {
+        return this.getDataTracker().get(IS_BEING_HELD);
+    }
+    public void setBeingHeld(boolean ibh) {
+        this.getDataTracker().set(IS_BEING_HELD,ibh);
+    }
+    public UUID getBeingHeldBy() {
+        return dataTracker.get(HELD_BY).isEmpty()?null:dataTracker.get(HELD_BY).get();
+    }
+    public void setBeingHeldBy(UUID ibh) {
+        dataTracker.set(HELD_BY,Optional.of(ibh));
+        heldBy =ibh;
+    }
+
+
     @Override
     public boolean isPushable() {
         return true;
@@ -192,6 +212,7 @@ public class FanEntity extends Entity {
     @Override
     public ActionResult interact(PlayerEntity player, Hand hand) {
 
+        // TODO: LIFT UP FAN
         if(player.getMainHandStack().isEmpty())
         {
             if(player.isSneaking())
@@ -209,18 +230,42 @@ public class FanEntity extends Entity {
     }
 
     public boolean damage(DamageSource source, float amount) {
+
         if (!this.world.isClient && !this.isRemoved()) {
             if (this.isInvulnerableTo(source)) {
                 return false;
             } else {
-                boolean bl = source.getAttacker() instanceof PlayerEntity && ((PlayerEntity)source.getAttacker()).getAbilities().creativeMode;
-                if (true) {
+                //boolean bl = source.getAttacker() instanceof PlayerEntity && ((PlayerEntity)source.getAttacker()).getAbilities().creativeMode;
+                if (hitTimer > 20) {
                     this.removeAllPassengers();
-                    if (bl && !this.hasCustomName()) {
+                    if (!this.hasCustomName()) {
                         this.discard();
                     } else {
                         this.dropItems(source);
                     }
+                }
+                else
+                {
+                    if(source.getAttacker()!=null)
+                    {
+
+                        if(source.getAttacker().isSneaking()){
+                            if(!isBeingHeld())
+                            {
+                                setBeingHeld(true);
+                                setBeingHeldBy(source.getAttacker().getUuid());
+                            }
+                            else
+                            {
+                                setBeingHeld(false);
+                                this.setVelocity(0,0,0);
+                                this.velocityModified = true;
+
+
+                            }
+                        }hitTimer+=9;
+                    }
+                    hitTimer+=2;
                 }
 
                 return true;
@@ -279,6 +324,8 @@ public class FanEntity extends Entity {
         getDataTracker().set(FAN_BLADE_ROTATION,nbt.getFloat("FanRotation"));
         getDataTracker().set(FAN_BLADE_ROTATION_SPEED,nbt.getFloat("FanRotationSpeed"));
         getDataTracker().set(FAN_BLADE_ROTATION_ACCELERATION,nbt.getFloat("FanRotationAccel"));
+        getDataTracker().set(IS_BEING_HELD,nbt.getBoolean("isBeingHeld"));
+        getDataTracker().set(HELD_BY,Optional.of(nbt.getUuid("HeldBy")));
     }
 
     @Override
@@ -290,6 +337,9 @@ public class FanEntity extends Entity {
         nbt.putFloat("SwingProgress",getDataTracker().get(SWING_PROGRESS));
         nbt.putFloat("FanRotationSpeed",getDataTracker().get(FAN_BLADE_ROTATION_SPEED));
         nbt.putFloat("FanRotation",getDataTracker().get(FAN_BLADE_ROTATION));
+        nbt.putBoolean("isBeingHeld",getDataTracker().get(IS_BEING_HELD));
+        if(getDataTracker().get(HELD_BY)!=null)
+            nbt.putUuid("HeldBy",getDataTracker().get(HELD_BY).isPresent()?getDataTracker().get(HELD_BY).get():null);
     }
 
     @Override
@@ -321,33 +371,55 @@ public class FanEntity extends Entity {
                     setRotationSpeed(0f);
                 }
                 break;
-            case 1: setRotationAcceleration(0.01f); rotSpeedLimit = 1f; break;
-            case 2: setRotationAcceleration(0.02f); rotSpeedLimit = 2f;break;
-            case 3: setRotationAcceleration(0.03f); rotSpeedLimit = 3f;break;
-            case 4: setRotationAcceleration(0.5f); rotSpeedLimit = 5f; break;
+            case 1: setRotationAcceleration(0.03f); rotSpeedLimit = 2f; break;
+            case 2: setRotationAcceleration(0.04f); rotSpeedLimit = 4.5f;break;
+            case 3: setRotationAcceleration(0.05f); rotSpeedLimit = 7f;break;
+            case 4: setRotationAcceleration(0.08f); rotSpeedLimit = 10f; break;
         }
-        if(getFanPower()!=0) setRotationSpeed(MathHelper.clamp(getRotationSpeed()+getRotationAcceleration(),-10.0f,10.0f));
+        if(getFanPower()!=0) setRotationSpeed(MathHelper.clamp(getRotationSpeed()+getRotationAcceleration(),-rotSpeedLimit,rotSpeedLimit));
         setBladeRotation(getBladeRotation()+MathHelper.clamp(getRotationSpeed(),-rotSpeedLimit,rotSpeedLimit));
 
 
         //this.setVelocity(this.getVelocity().multiply(0.98));
 
         //System.out.println((world.isClient?"client":"server")+" has " + " " +getPos());
-        if(!this.hasNoGravity())
+        if(isBeingHeld())
+        {
+            if(!this.world.isClient)
+            {
+                ServerWorld srvw = (ServerWorld) world;
+                if(srvw.getEntity(getBeingHeldBy())!=null){
+                    Entity ent = srvw.getEntity(getBeingHeldBy());
+                    prevX=this.getX();
+                    prevY=this.getY();
+                    prevZ=this.getZ();
+                    Vec3d looking = ent.getRotationVec(0f).normalize();
+                    this.setPosition(ent.getX()+looking.getX(),ent.getY()+ent.getEyeHeight(ent.getPose())+looking.getY()-this.getHeight()/2.0f,ent.getZ()+looking.getZ());
 
-            this.setVelocity(this.getVelocity().add(0.0, -0.04, 0.0));
-
-        //this.setPosition(this.getX()+getVelocity().getX(),this.getY()+getVelocity().getY(),this.getZ()+getVelocity().getZ());
-        this.move(MovementType.SELF, this.getVelocity());
-
-        float f = 0.98F;
-        if (this.onGround) {
-            f = this.world.getBlockState(new BlockPos(this.getX(), this.getY() - 1.0, this.getZ())).getBlock().getSlipperiness() * 0.98F;
+                    this.setYaw(ent.getYaw());
+                    this.setPitch(ent.getPitch());
+                }
+            }
         }
+        else
+        {
 
-        this.setVelocity(this.getVelocity().multiply((double)f, 0.98, (double)f));
-        if (this.onGround) {
-            this.setVelocity(this.getVelocity().multiply(1.0, -0.9, 1.0));
+            if(!this.hasNoGravity())
+
+                this.setVelocity(this.getVelocity().add(0.0, -0.04, 0.0));
+
+            //this.setPosition(this.getX()+getVelocity().getX(),this.getY()+getVelocity().getY(),this.getZ()+getVelocity().getZ());
+            this.move(MovementType.SELF, this.getVelocity());
+
+            float f = 0.98F;
+            if (this.onGround) {
+                f = this.world.getBlockState(new BlockPos(this.getX(), this.getY() - 1.0, this.getZ())).getBlock().getSlipperiness() * 0.98F;
+            }
+
+            this.setVelocity(this.getVelocity().multiply((double)f, 0.98, (double)f));
+            if (this.onGround) {
+                this.setVelocity(this.getVelocity().multiply(1.0, -0.9, 1.0));
+            }
         }
 
         //this.checkBlockCollision();
@@ -359,17 +431,56 @@ public class FanEntity extends Entity {
             this.setSwingingProgress(this.getSwingingProgress()+this.getSwingSpeed());
         }
         Vec3d blowFrom = getPos();
-        blowFrom = blowFrom.add(Vec3d.fromPolar(0f,getYaw()+getDegreeToBlow()).normalize().multiply(-3/16f));
+        blowFrom = blowFrom.add(Vec3d.fromPolar(this.getPitch(),getYaw()+getDegreeToBlow()).normalize().multiply(-3/16f));
         //blowFrom.add(0f,0.75f,0f);
-        Vec3d blowWay = Vec3d.fromPolar(0f,getYaw()+getDegreeToBlow()).normalize().multiply((getRotationSpeed()/20f));
+        Vec3d blowWay = Vec3d.fromPolar(this.getPitch(),getYaw()+getDegreeToBlow()).normalize().multiply((getRotationSpeed()/20f));
 
 
+        if(hitTimer>0)hitTimer--;
         //System.out.println(getDegreeToBlow());
-        if(getRotationSpeed()>0)
+        if(MathHelper.abs(getRotationSpeed())>0)
         {
 
+            if(Math.round(MathHelper.abs(getRotationSpeed()/1f))>0f)
+            playSound(Bigfan.FAN_HUMS_SOUND_EVENT,0.4f,Math.abs(getRotationSpeed())/10.0f);
+            if(isBeingHeld())
+            {
+
+                if(!this.world.isClient)
+                {
+                    if(isBeingHeld())
+                    {
+                        ServerWorld srvw = (ServerWorld) world;
+                        if(srvw.getEntity(getBeingHeldBy())!=null){
+                            Entity ent = srvw.getEntity(getBeingHeldBy());
+                            if(!ent.isSneaking() && (ent instanceof PlayerEntity && !((PlayerEntity) ent).getAbilities().flying))
+                            {
+
+                                //Vec3d addVel = ent.getRotationVec(0).normalize().multiply(getRotationSpeed()/180.0f);
+
+                                Vec3d addVel = Vec3d.fromPolar(ent.getPitch(),ent.getYaw()+getDegreeToBlow()).normalize().multiply((getRotationSpeed()/60f));
+                                addVel = addVel.multiply(-1);
+                                ent.setVelocity(ent.getVelocity().add(addVel).getX(),ent.getVelocity().add(addVel).getY(),ent.getVelocity().add(addVel).getZ());
+                                ent.velocityModified = true;
+                                ent.updatePosition(ent.getX(),ent.getY(),ent.getZ());
+                                if(ent instanceof LivingEntity){
+                                    LivingEntity target = (LivingEntity) ent;
+                                    if (target instanceof ServerPlayerEntity && target.velocityModified) {
+                                        ((ServerPlayerEntity)target).networkHandler.sendPacket(new EntityVelocityUpdateS2CPacket(target));
+                                        target.velocityModified = false;
+                                    }
+                                }
+                            }
+                        }
+                    }
+                }
+            }
             FanWindEntity wind = new FanWindEntity(Bigfan.FAN_WIND_ENTITY,world);
+            wind.setFanOwner(this);
+            wind.setFanRotSpd(getRotationSpeed());
             wind.setPosition(blowFrom.add(0f,0.75f,0f));
+            wind.setFanPowerLevel(this.getFanPower());
+            if(isBeingHeld()) wind.setFanHolder(getBeingHeldBy());
             wind.setVelocity(blowWay);
             wind.setLife(getRotationSpeed()*3);
             wind.setYaw(getYaw());
