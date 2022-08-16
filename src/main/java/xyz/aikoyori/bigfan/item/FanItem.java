@@ -45,8 +45,8 @@ public class FanItem extends Item {
 
             }
         };
-        System.out.println(positive);
-        System.out.println(context.getSide());
+        //System.out.println(positive);
+        //System.out.println(context.getSide());
         World world = context.getWorld();
         Box box = Bigfan.FAN_ENTITY.getDimensions().getBoxAt(positive.getX()+0.5, positive.getY(), positive.getZ()+0.5);
         if (world.isSpaceEmpty((Entity)null, box) && world.getOtherEntities((Entity)null, box).isEmpty()) {
