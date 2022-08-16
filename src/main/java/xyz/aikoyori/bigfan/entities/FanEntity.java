@@ -325,7 +325,13 @@ public class FanEntity extends Entity {
         getDataTracker().set(FAN_BLADE_ROTATION_SPEED,nbt.getFloat("FanRotationSpeed"));
         getDataTracker().set(FAN_BLADE_ROTATION_ACCELERATION,nbt.getFloat("FanRotationAccel"));
         getDataTracker().set(IS_BEING_HELD,nbt.getBoolean("isBeingHeld"));
-        getDataTracker().set(HELD_BY,Optional.of(nbt.getUuid("HeldBy")));
+        try{
+            getDataTracker().set(HELD_BY,Optional.of(nbt.getUuid("HeldBy")));
+        }
+        catch (Exception ex)
+        {
+
+        }
     }
 
     @Override
@@ -337,9 +343,16 @@ public class FanEntity extends Entity {
         nbt.putFloat("SwingProgress",getDataTracker().get(SWING_PROGRESS));
         nbt.putFloat("FanRotationSpeed",getDataTracker().get(FAN_BLADE_ROTATION_SPEED));
         nbt.putFloat("FanRotation",getDataTracker().get(FAN_BLADE_ROTATION));
+        nbt.putFloat("FanRotationAccel",getDataTracker().get(FAN_BLADE_ROTATION_ACCELERATION));
         nbt.putBoolean("isBeingHeld",getDataTracker().get(IS_BEING_HELD));
-        if(getDataTracker().get(HELD_BY)!=null)
-            nbt.putUuid("HeldBy",getDataTracker().get(HELD_BY).isPresent()?getDataTracker().get(HELD_BY).get():null);
+        try{
+            if(getDataTracker().get(HELD_BY)!=null)
+                nbt.putUuid("HeldBy",getDataTracker().get(HELD_BY).isPresent()?getDataTracker().get(HELD_BY).get():null);
+        }
+        catch (Exception ex)
+        {
+
+        }
     }
 
     @Override
