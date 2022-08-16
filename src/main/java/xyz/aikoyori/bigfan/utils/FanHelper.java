@@ -35,4 +35,22 @@ public class FanHelper {
 
         return (HitResult)hitResult;
     }
+    public static HitResult getCollisionFromVector(Entity entity, Predicate<Entity> predicate,Vec3d vecIn) {
+
+        World world = entity.world;
+        Vec3d vec3d2 = entity.getPos();
+        Vec3d vec3d3 = vec3d2.add(vecIn);
+        HitResult hitResult = world.raycast(new RaycastContext(vec3d2, vec3d3, RaycastContext.ShapeType.COLLIDER, RaycastContext.FluidHandling.NONE, entity));
+        if (((HitResult)hitResult).getType() != HitResult.Type.MISS) {
+            vec3d3 = ((HitResult)hitResult).getPos();
+        }
+
+        HitResult hitResult2 = getEntityCollision(world, entity, vec3d2, vec3d3, entity.getBoundingBox().stretch(vecIn).expand(1.0), predicate);
+        if (hitResult2 != null) {
+            hitResult = hitResult2;
+        }
+
+        return (HitResult)hitResult;
+    }
+
 }

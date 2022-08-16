@@ -1,10 +1,7 @@
 package xyz.aikoyori.bigfan.entities;
 
 import net.fabricmc.fabric.api.registry.FlammableBlockRegistry;
-import net.minecraft.block.AbstractFireBlock;
-import net.minecraft.block.Blocks;
-import net.minecraft.block.FireBlock;
-import net.minecraft.block.FluidBlock;
+import net.minecraft.block.*;
 import net.minecraft.entity.Entity;
 import net.minecraft.entity.EntityType;
 import net.minecraft.entity.LivingEntity;
@@ -30,6 +27,7 @@ import xyz.aikoyori.bigfan.Bigfan;
 
 import java.util.UUID;
 
+import static xyz.aikoyori.bigfan.utils.FanHelper.getCollisionFromVector;
 import static xyz.aikoyori.bigfan.utils.FanHelper.getOutlineCollision;
 
 public class FanWindEntity extends Entity {
@@ -146,6 +144,7 @@ public class FanWindEntity extends Entity {
                         },spwnL.getX(),spwnL.getY(),spwnL.getZ(),norm.getX(),norm.getY(),norm.getZ());
 
         HitResult hitResult2 = ProjectileUtil.getCollision(this, this::canHit);
+        HitResult hitResult3 = getCollisionFromVector(this, this::canHit,getVelocity().multiply(-1));
         HitResult hitResult = getOutlineCollision(this, this::canHit);
         if(hitResult.getType()== HitResult.Type.BLOCK)
         {
@@ -173,9 +172,20 @@ public class FanWindEntity extends Entity {
             }
 
         }
-        if(hitResult2.getType()== HitResult.Type.BLOCK)
+        if(hitResult2.getType()== HitResult.Type.BLOCK && hitResult3.getType()== HitResult.Type.BLOCK)
         {
-            setLife(0);
+            BlockHitResult bhr2 = ((BlockHitResult)hitResult2);
+            BlockHitResult bhr3 = ((BlockHitResult)hitResult3);
+            if ((Block.isFaceFullSquare(
+                            world.getBlockState(bhr2.getBlockPos()).getSidesShape(world, bhr2.getBlockPos()),bhr2.getSide())) ||
+                    (Block.isFaceFullSquare(
+                            world.getBlockState(bhr3.getBlockPos()).getSidesShape(world, bhr3.getBlockPos()),bhr3.getSide()))
+            )
+            {
+                setLife(0);
+            }
+
+
 
         }
         if(hitResult.getType()== HitResult.Type.ENTITY)
