@@ -451,11 +451,12 @@ public class FanEntity extends Entity {
 
         if(hitTimer>0)hitTimer--;
         //System.out.println(getDegreeToBlow());
+        age++;
         if(MathHelper.abs(getRotationSpeed())>0)
         {
 
-            if(Math.round(MathHelper.abs(getRotationSpeed()/1f))>0f)
-            playSound(Bigfan.FAN_HUMS_SOUND_EVENT,0.4f,Math.abs(getRotationSpeed())/10.0f);
+            if(Math.round(MathHelper.abs(getRotationSpeed()/1f))>0f && (this.age%(7-getFanPower())==0))
+            playSound(Bigfan.FAN_HUMS_SOUND_EVENT,0.4f,Math.abs(getRotationSpeed())/12.0f);
             if(isBeingHeld())
             {
 
@@ -492,6 +493,7 @@ public class FanEntity extends Entity {
             wind.setFanOwner(this);
             wind.setFanRotSpd(getRotationSpeed());
             wind.setPosition(blowFrom.add(0f,0.75f,0f));
+            if(this.isOnFire()) wind.setWindOnFire(true);
             wind.setFanPowerLevel(this.getFanPower());
             if(isBeingHeld()) wind.setFanHolder(getBeingHeldBy());
             wind.setVelocity(blowWay);
