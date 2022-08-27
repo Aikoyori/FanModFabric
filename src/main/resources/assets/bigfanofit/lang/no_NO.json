@@ -1,5 +1,6 @@
 {
   "entity.bigfanofit.fan" : "Vifte",
   "item.bigfanofit.fan" : "Vifte",
-  "subtitles.bigfanofit.fan_hum" : "Vifte nynner"
+  "subtitles.bigfanofit.fan_hum" : "Vifte nynner",
+  "subtitles.bigfanofit.fan_button_clicks" : "Vifteknapp trykket"
 }
