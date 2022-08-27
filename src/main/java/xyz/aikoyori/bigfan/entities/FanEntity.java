@@ -62,7 +62,7 @@ public class FanEntity extends Entity {
         this.dataTracker.startTracking(FAN_BLADE_ROTATION_SPEED, 0.00f);
         this.dataTracker.startTracking(FAN_BLADE_ROTATION_ACCELERATION, 0.00f);
         this.dataTracker.startTracking(IS_BEING_HELD, false);
-        this.dataTracker.startTracking(HELD_BY, null);
+        this.dataTracker.startTracking(HELD_BY, Optional.empty());
 
 
     }
@@ -148,11 +148,15 @@ public class FanEntity extends Entity {
             fanTarget+=5;
         }
         while(fanTarget<0);
+        int oldFanPower = getFanPower();
+
         setFanPower(fanTarget%5);
+
+
         float pitch = switch(getFanPower())
                 {
                     case 0:
-                        yield 0f;
+                        yield 1f;
                     case 1:
                         yield 1f;
                     case 2:
@@ -164,7 +168,21 @@ public class FanEntity extends Entity {
                     default:
                         yield 1f;
                 };
-        this.playSound(SoundEvents.UI_BUTTON_CLICK, 8f,pitch);
+
+        if(oldFanPower == 0)
+        {
+            this.playSound(Bigfan.FAN_BUTTON_SNDEVT, 8f,pitch);
+        }
+        else if(getFanPower()==0)
+        {
+
+            this.playSound(Bigfan.FAN_POWEROFF_SNDEVT, 8f,pitch);
+        }
+        else
+        {
+            this.playSound(Bigfan.FAN_BUTTON_SWITCH_EVT, 8f,pitch);
+        }
+
     }
 
     public float getPrevBladeRot() {
@@ -218,7 +236,7 @@ public class FanEntity extends Entity {
             if(player.isSneaking())
             {
                 setSwinging(!isSwinging());
-                this.playSound(SoundEvents.UI_BUTTON_CLICK, 8f,0.5f);
+                this.playSound(isSwinging()?Bigfan.FAN_SWING_SNDEVT:Bigfan.FAN_UNSWING_SNDEVT, 8f,0.5f);
             }
             else
                 scrollFanNumber(1);

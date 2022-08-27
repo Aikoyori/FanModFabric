@@ -2,7 +2,59 @@
   "fan_hums": {
     "subtitle": "subtitles.bigfanofit.fan_hum",
     "sounds": [
-      "bigfanofit:fan"
+      "bigfanofit:fan",
+      "bigfanofit:fan2",
+      "bigfanofit:fan3"
+    ]
+  },
+
+  "fan_button_click": {
+    "subtitle": "subtitles.bigfanofit.fan_button_clicks",
+    "sounds": [
+      "bigfanofit:fanbutton1",
+      "bigfanofit:fanbutton2",
+      "bigfanofit:fanbutton3",
+      "bigfanofit:fanbutton4",
+      "bigfanofit:fanbutton5"
+    ]
+  },
+  "fan_button_switch": {
+    "subtitle": "subtitles.bigfanofit.fan_button_clicks",
+    "sounds": [
+      "bigfanofit:fanswitch1",
+      "bigfanofit:fanswitch2",
+      "bigfanofit:fanswitch3",
+      "bigfanofit:fanswitch4",
+      "bigfanofit:fanswitch5",
+      "bigfanofit:fanswitch6"
+    ]
+  },
+  "fan_poweroff": {
+    "subtitle": "subtitles.bigfanofit.fan_button_clicks",
+    "sounds": [
+      "bigfanofit:fanoff1",
+      "bigfanofit:fanoff2",
+      "bigfanofit:fanoff3"
+    ]
+  },
+  "fan_swing_click": {
+    "subtitle": "subtitles.bigfanofit.fan_button_clicks",
+    "sounds": [
+      "bigfanofit:fanswingtoggle1",
+      "bigfanofit:fanswingtoggle2",
+      "bigfanofit:fanswingtoggle3",
+      "bigfanofit:fanswingtoggle4",
+      "bigfanofit:fanswingtoggle5"
+    ]
+  },
+  "fan_unswing_click": {
+    "subtitle": "subtitles.bigfanofit.fan_button_clicks",
+    "sounds": [
+      "bigfanofit:fanswingtoggleoff1",
+      "bigfanofit:fanswingtoggleoff2",
+      "bigfanofit:fanswingtoggleoff3",
+      "bigfanofit:fanswingtoggleoff4",
+      "bigfanofit:fanswingtoggleoff5"
     ]
   }
 }

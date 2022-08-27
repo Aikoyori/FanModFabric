@@ -35,12 +35,28 @@ public class Bigfan implements ModInitializer {
 
     public static final Identifier FAN_HUMS_ID = new Identifier(MOD_ID,"fan_hums");
     public static SoundEvent FAN_HUMS_SOUND_EVENT = new SoundEvent(FAN_HUMS_ID);
+    public static final Identifier FAN_BUTTON_CLICK_ID = new Identifier(MOD_ID,"fan_button_click");
+    public static SoundEvent FAN_BUTTON_SNDEVT = new SoundEvent(FAN_BUTTON_CLICK_ID);
+    public static final Identifier FAN_BUTTON_SWITCH = new Identifier(MOD_ID,"fan_button_switch");
+    public static SoundEvent FAN_BUTTON_SWITCH_EVT = new SoundEvent(FAN_BUTTON_SWITCH);
+    public static final Identifier FAN_POWEROFF_ID = new Identifier(MOD_ID,"fan_poweroff");
+    public static SoundEvent FAN_POWEROFF_SNDEVT = new SoundEvent(FAN_POWEROFF_ID);
+    public static final Identifier FAN_SWING_CLICK_ID = new Identifier(MOD_ID,"fan_swing_click");
+    public static SoundEvent FAN_SWING_SNDEVT = new SoundEvent(FAN_SWING_CLICK_ID);
+    public static final Identifier FAN_UNSWING_CLICK_ID = new Identifier(MOD_ID,"fan_unswing_click");
+    public static SoundEvent FAN_UNSWING_SNDEVT = new SoundEvent(FAN_UNSWING_CLICK_ID);
+
     @Override
     public void onInitialize() {
 
         Registry.register(Registry.PARTICLE_TYPE, new Identifier(MOD_ID, "leaf_blow"), LEAF_BLOW);
         Registry.register(Registry.ITEM,new Identifier(MOD_ID,"fan"),FAN_ITEM);
         Registry.register(Registry.SOUND_EVENT, FAN_HUMS_ID, FAN_HUMS_SOUND_EVENT);
+        Registry.register(Registry.SOUND_EVENT, FAN_BUTTON_CLICK_ID, FAN_BUTTON_SNDEVT);
+        Registry.register(Registry.SOUND_EVENT, FAN_SWING_CLICK_ID, FAN_SWING_SNDEVT);
+        Registry.register(Registry.SOUND_EVENT, FAN_BUTTON_SWITCH, FAN_BUTTON_SWITCH_EVT);
+        Registry.register(Registry.SOUND_EVENT, FAN_UNSWING_CLICK_ID, FAN_UNSWING_SNDEVT);
+        Registry.register(Registry.SOUND_EVENT, FAN_POWEROFF_ID, FAN_POWEROFF_SNDEVT);
 
     }
 }

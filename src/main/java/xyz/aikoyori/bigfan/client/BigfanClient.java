@@ -14,6 +14,7 @@ import net.minecraft.util.Identifier;
 import xyz.aikoyori.bigfan.Bigfan;
 import xyz.aikoyori.bigfan.entities.FanEntityModel;
 import xyz.aikoyori.bigfan.entities.FanEntityRenderer;
+import xyz.aikoyori.bigfan.particles.LeafParticles;
 
 @net.fabricmc.api.Environment(net.fabricmc.api.EnvType.CLIENT)
 public class BigfanClient implements ClientModInitializer {
@@ -30,6 +31,6 @@ return new FanEntityRenderer(ctx,new FanEntityModel(ctx.getPart(FAN_LAYER)),0.5f
             registry.register(new Identifier(Bigfan.MOD_ID, "particle/leaf_blow"));
         }));
 
-        ParticleFactoryRegistry.getInstance().register(Bigfan.LEAF_BLOW, CloudParticle.CloudFactory::new);
+        ParticleFactoryRegistry.getInstance().register(Bigfan.LEAF_BLOW, LeafParticles.LeafFactory::new);
     }
 }

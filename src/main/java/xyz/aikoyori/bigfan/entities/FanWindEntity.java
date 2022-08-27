@@ -130,7 +130,7 @@ public class FanWindEntity extends Entity {
 
         Vec3d norm = getVelocity().normalize().multiply(particleType==0?0.3:0.03);
         norm = norm.multiply(getFanRotSpd()/10.0f);
-        Vec3d spwnL = new Vec3d(getX()+(random.nextFloat()-0.5f)*0.2,getY()+(random.nextFloat()-0.5f)*0.2,getZ()+(random.nextFloat()-0.5f)*0.2);
+        Vec3d spwnL = new Vec3d(getX()+(random.nextFloat()-0.5f)*0.4,getY()+(random.nextFloat()-0.5f)*0.4,getZ()+(random.nextFloat()-0.5f)*0.4);
 
         if(particleType==0)
         spwnL = spwnL.add(norm.multiply(-10f));

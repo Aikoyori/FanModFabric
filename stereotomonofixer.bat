@@ -1,0 +1,1 @@
+for %%f in (*.ogg) do ffmpeg -i "%%f" -ac 1 "fix/%%~nf.ogg"
