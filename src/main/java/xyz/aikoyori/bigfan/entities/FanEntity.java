@@ -171,16 +171,16 @@ public class FanEntity extends Entity {
 
         if(oldFanPower == 0)
         {
-            this.playSound(Bigfan.FAN_BUTTON_SNDEVT, 8f,pitch);
+            this.playSound(Bigfan.FAN_BUTTON_SNDEVT, 0.4f,pitch);
         }
         else if(getFanPower()==0)
         {
 
-            this.playSound(Bigfan.FAN_POWEROFF_SNDEVT, 8f,pitch);
+            this.playSound(Bigfan.FAN_POWEROFF_SNDEVT, 0.4f,pitch);
         }
         else
         {
-            this.playSound(Bigfan.FAN_BUTTON_SWITCH_EVT, 8f,pitch);
+            this.playSound(Bigfan.FAN_BUTTON_SWITCH_EVT, 0.4f,pitch);
         }
 
     }
@@ -236,7 +236,7 @@ public class FanEntity extends Entity {
             if(player.isSneaking())
             {
                 setSwinging(!isSwinging());
-                this.playSound(isSwinging()?Bigfan.FAN_SWING_SNDEVT:Bigfan.FAN_UNSWING_SNDEVT, 8f,0.5f);
+                this.playSound(isSwinging()?Bigfan.FAN_SWING_SNDEVT:Bigfan.FAN_UNSWING_SNDEVT, 0.4f,0.5f);
             }
             else
                 scrollFanNumber(1);
