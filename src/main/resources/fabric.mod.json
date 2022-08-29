@@ -20,9 +20,6 @@
       "xyz.aikoyori.bigfan.Bigfan"
     ]
   },
-  "mixins": [
-    "bigfan.mixins.json"
-  ],
   "depends": {
     "fabric": "*",
     "minecraft": "1.19.2"
