@@ -3,7 +3,7 @@
   "pattern": [
     "#HQ",
     "HIH",
-    "RHG"
+    "REG"
   ],
   "key": {
     "#": {
@@ -23,6 +23,9 @@
     },
     "G": {
       "item": "minecraft:gold_block"
+    },
+    "E": {
+      "item": "minecraft:end_rod"
     }
   },
   "result": {

@@ -39,7 +39,7 @@ public class FanEntityModel extends EntityModel<Entity> {
 
 		ModelPartData twisty = fan.addChild("twisty", ModelPartBuilder.create().uv(28, 28).cuboid(-2.0F, 0.0F, -5.5F, 4.0F, 4.0F, 8.0F, new Dilation(0.0F)), ModelTransform.pivot(0.0F, 9.0F, 1.5F));
 
-		ModelPartData bone = twisty.addChild("bone", ModelPartBuilder.create().uv(28, 20).cuboid(-0.5F, 12.0F, 2.5F, 1.0F, 2.0F, 1.0F, new Dilation(0.0F)), ModelTransform.pivot(0.0F, -9.0F, -1.5F));
+		ModelPartData twister_toggler = twisty.addChild("twister_toggler", ModelPartBuilder.create().uv(28, 20).cuboid(-0.5F, 12.0F, 2.5F, 1.0F, 2.0F, 1.0F, new Dilation(0.0F)), ModelTransform.pivot(0.0F, -9.0F, -1.5F));
 
 		ModelPartData face = twisty.addChild("face", ModelPartBuilder.create().uv(0, 7).cuboid(-1.0F, 9.75F, -6.5F, 2.0F, 2.0F, 2.0F, new Dilation(0.0F)), ModelTransform.pivot(0.0F, -8.75F, -1.5F));
 
@@ -67,6 +67,13 @@ public class FanEntityModel extends EntityModel<Entity> {
 	}
 	public void setSwingProgressForTwistingFace(float prevRotationProgress, float rotationProgress, float deltaTicks,float pitch) {
 		fan.getChild("twisty").setAngles(pitch,(float)(MathHelper.sin(((float)(MathHelper.lerp(deltaTicks,prevRotationProgress,rotationProgress)*Math.PI*2.0f)))*(Math.PI/4.0f)),0f);
+	}
+	public void setTwistingToggle(boolean twisting) {
+		fan.getChild("twisty").getChild("twister_toggler").setAngles(!twisting?0f:-20f*MathHelper.PI/360.0f,0f,0f);
+	}
+
+	public void setDamageTwist(float tickd) {
+		fan.setAngles(0f,0f,tickd*MathHelper.PI/360.0f);
 	}
 
 	public void setPowerButtonPress(int powerLevel) {

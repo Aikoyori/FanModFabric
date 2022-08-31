@@ -38,12 +38,12 @@ public class FanWindEntity extends Entity {
         super(type, world);
     }
 
-    public FanEntity getFanOwner() {
-        return fanOwner;
+    public int getFanOwner() {
+        return fanOwnerEnId;
     }
 
-    public void setFanOwner(FanEntity fanOwner) {
-        this.fanOwner = fanOwner;
+    public void setFanOwner(int fanOwner) {
+        this.fanOwnerEnId = fanOwner;
     }
 
     public void setFanRotSpd(float fanRotSpd) {
@@ -53,7 +53,7 @@ public class FanWindEntity extends Entity {
         return getDataTracker().get(FAN_ROT_SPD);
     }
 
-    FanEntity fanOwner;
+    int fanOwnerEnId;
     public UUID getFanHolder() {
         return fanHolder;
     }
@@ -92,13 +92,22 @@ public class FanWindEntity extends Entity {
         return this.dataTracker.get(ON_FIRE);
     }
 
+
+
     protected boolean canHit(Entity entity) {
-        if (!entity.isSpectator() && entity.isAlive() && entity.canHit() && !(entity instanceof FanEntity)&& !(entity instanceof FanWindEntity)) {
+        boolean xd = false;
+        if(this.world.getEntityById(fanOwnerEnId) instanceof FanEntity fan && fan.isBeingHeld() && this.world.getEntityById(fan.getBeingHeldByClientSync()).equals(entity))
+        {
+            xd = true;
+        }
+        if (!entity.isSpectator() && !(entity instanceof FanEntity)&& !(entity instanceof FanWindEntity) && !(xd)) {
             return true;
         } else {
             return false;
         }
     }
+
+
 
     @Override
     public void tick() {
@@ -133,7 +142,7 @@ public class FanWindEntity extends Entity {
         Vec3d spwnL = new Vec3d(getX()+(random.nextFloat()-0.5f)*0.4,getY()+(random.nextFloat()-0.5f)*0.4,getZ()+(random.nextFloat()-0.5f)*0.4);
 
         if(particleType==0)
-        spwnL = spwnL.add(norm.multiply(-10f));
+        spwnL = spwnL.add(norm.multiply(-1f));
         if(this.random.nextFloat()>0.85f+0.02f*getFanPowerLevel())
         world.addParticle(
                 switch (particleType)

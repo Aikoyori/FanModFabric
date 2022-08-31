@@ -28,6 +28,7 @@ public class FanEntityRenderer extends EntityRenderer<FanEntity> {
         return TX;
     }
 
+
     @Override
     public void render(FanEntity entity, float yaw, float tickDelta, MatrixStack matrices, VertexConsumerProvider vertexConsumers, int light) {
         super.render(entity, yaw, tickDelta, matrices, vertexConsumers, light);
@@ -36,8 +37,11 @@ public class FanEntityRenderer extends EntityRenderer<FanEntity> {
 
         matrices.multiply(Vec3f.POSITIVE_Y.getDegreesQuaternion(-entity.getYaw(tickDelta)+180f));
         entityModel.setSwingProgressForTwistingFace(entity.getPrevSwingProg(), entity.getSwingingProgress(),tickDelta,-entity.getPitch()* MathHelper.PI/180.0f);
+        entityModel.setTwistingToggle(entity.isSwinging());
         entityModel.setBladeRotation(entity.getPrevBladeRot(),entity.getBladeRotation(),tickDelta);
         entityModel.setPowerButtonPress(entity.getFanPower());
+        entityModel.setDamageTwist(entity.getLerpedHitTimer(tickDelta));
+        //System.out.println(entity.getPrevHitTimer(tickDelta)+" "+entity.getHitTimer(tickDelta)+" "+tickDelta);
         entityModel.render(matrices,vertexConsumers.getBuffer(RenderLayer.getEntityTranslucentCull(TX)),light, OverlayTexture.DEFAULT_UV,1.0f,1.0f,1.0f,1.0f);
 
         matrices.pop();
