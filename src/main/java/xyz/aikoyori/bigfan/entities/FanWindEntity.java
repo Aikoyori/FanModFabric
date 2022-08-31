@@ -1,5 +1,6 @@
 package xyz.aikoyori.bigfan.entities;
 
+import com.google.common.base.Suppliers;
 import net.fabricmc.fabric.api.registry.FlammableBlockRegistry;
 import net.minecraft.block.*;
 import net.minecraft.entity.Entity;
@@ -18,6 +19,7 @@ import net.minecraft.nbt.NbtCompound;
 import net.minecraft.network.Packet;
 import net.minecraft.network.packet.s2c.play.EntitySpawnS2CPacket;
 import net.minecraft.network.packet.s2c.play.EntityVelocityUpdateS2CPacket;
+import net.minecraft.particle.ParticleEffect;
 import net.minecraft.particle.ParticleTypes;
 import net.minecraft.server.network.ServerPlayerEntity;
 import net.minecraft.tag.FluidTags;
@@ -38,6 +40,7 @@ public class FanWindEntity extends Entity {
     private static final TrackedData<Float> LIFE = DataTracker.registerData(FanWindEntity.class, TrackedDataHandlerRegistry.FLOAT);
     private static final TrackedData<Float> FAN_ROT_SPD = DataTracker.registerData(FanWindEntity.class, TrackedDataHandlerRegistry.FLOAT);
     private static final TrackedData<Boolean> ON_FIRE = DataTracker.registerData(FanWindEntity.class, TrackedDataHandlerRegistry.BOOLEAN);
+    private static final TrackedData<Integer> SPECIAL_PARTILCLE_TYPES = DataTracker.registerData(FanWindEntity.class, TrackedDataHandlerRegistry.INTEGER);
     public FanWindEntity(EntityType<?> type, World world) {
         super(type, world);
     }
@@ -148,13 +151,26 @@ public class FanWindEntity extends Entity {
         if(particleType==0)
         spwnL = spwnL.add(norm.multiply(-1f));
         if(this.random.nextFloat()>0.85f+0.02f*getFanPowerLevel())
-        world.addParticle(
-                switch (particleType)
-                        {
-                            case 1 -> ParticleTypes.FLAME;
-                            case 2 -> ParticleTypes.BUBBLE;
-                            default -> Bigfan.LEAF_BLOW;
-                        },spwnL.getX(),spwnL.getY(),spwnL.getZ(),norm.getX(),norm.getY(),norm.getZ());
+        {
+
+            ParticleEffect fxParticleEffect;
+            if(getSpecialParticle() == 1)
+            {
+                fxParticleEffect = Bigfan.LAVENDER_BLOW;
+            }
+            else
+            {
+                fxParticleEffect = Bigfan.LEAF_BLOW;
+            }
+            fxParticleEffect = switch (particleType)
+                    {
+                        case 1 -> ParticleTypes.FLAME;
+                        case 2 -> ParticleTypes.BUBBLE;
+                        default -> fxParticleEffect;
+                    };
+            world.addParticle(fxParticleEffect
+                    ,spwnL.getX(),spwnL.getY(),spwnL.getZ(),norm.getX(),norm.getY(),norm.getZ());
+        }
 
         HitResult hitResult2 = ProjectileUtil.getCollision(this, this::canHit);
         HitResult hitResult3 = getCollisionFromVector(this, this::canHit,getVelocity().multiply(-1));
@@ -264,8 +280,16 @@ public class FanWindEntity extends Entity {
         this.getDataTracker().startTracking(LIFE,0f);
         this.getDataTracker().startTracking(ON_FIRE,false);
         this.getDataTracker().startTracking(FAN_ROT_SPD,0.0f);
+        this.getDataTracker().startTracking(SPECIAL_PARTILCLE_TYPES,0);
     }
-
+    public void setSpecialParticle(int particleIndex)
+    {
+        this.getDataTracker().set(SPECIAL_PARTILCLE_TYPES,particleIndex);
+    }
+    public int getSpecialParticle()
+    {
+        return this.getDataTracker().get(SPECIAL_PARTILCLE_TYPES);
+    }
     @Override
     protected void readCustomDataFromNbt(NbtCompound nbt) {
 

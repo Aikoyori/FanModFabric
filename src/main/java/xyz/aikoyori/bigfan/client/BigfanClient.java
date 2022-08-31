@@ -32,5 +32,6 @@ return new FanEntityRenderer(ctx,new FanEntityModel(ctx.getPart(FAN_LAYER)),0.5f
         }));
 
         ParticleFactoryRegistry.getInstance().register(Bigfan.LEAF_BLOW, LeafParticles.LeafFactory::new);
+        ParticleFactoryRegistry.getInstance().register(Bigfan.LAVENDER_BLOW, LeafParticles.LavenderPetalsParticle::new);
     }
 }

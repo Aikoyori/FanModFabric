@@ -6,6 +6,7 @@ import net.minecraft.entity.data.DataTracker;
 import net.minecraft.entity.data.TrackedData;
 import net.minecraft.entity.data.TrackedDataHandlerRegistry;
 import net.minecraft.entity.player.PlayerEntity;
+import net.minecraft.entity.projectile.thrown.EnderPearlEntity;
 import net.minecraft.item.Item;
 import net.minecraft.item.ItemStack;
 import net.minecraft.nbt.NbtCompound;
@@ -316,7 +317,8 @@ public class FanEntity extends Entity {
                     if(source.getAttacker()!=null)
                     {
 
-                        if(source.getAttacker().isSneaking()){
+
+                        if((source.getAttacker().isSneaking() && (source.getSource()!=null && source.getSource() instanceof PlayerEntity)) || (source.getSource()!=null && source.getSource() instanceof EnderPearlEntity)){
                             if(!isBeingHeld())
                             {
                                 setBeingHeld(true);
@@ -495,6 +497,16 @@ public class FanEntity extends Entity {
         //this.setVelocity(this.getVelocity().multiply(0.98));
 
         //System.out.println((world.isClient?"client":"server")+" has " + " " +getPos());
+
+        if(world.isClient)
+        {
+
+            this.prevX = this.getX();
+            this.prevY = this.getY();
+            this.prevZ = this.getZ();
+            this.positionTrackTick();
+        }
+
         if(isBeingHeld())
         {
             Entity ent = null;
@@ -510,14 +522,6 @@ public class FanEntity extends Entity {
             ent = world.getEntityById(getBeingHeldByClientSync());
             if(ent!=null)
             {
-                if(world.isClient)
-                {
-
-                    this.prevX = this.getX();
-                    this.prevY = this.getY();
-                    this.prevZ = this.getZ();
-                    this.positionTrackTick();
-                }
                 Vec3d looking = ent.getRotationVec(0f).normalize();
                 this.setPosition(ent.getX()+looking.getX(),ent.getY()+ent.getEyeHeight(ent.getPose())+looking.getY()-this.getHeight()/2.0f,ent.getZ()+looking.getZ());
 
@@ -581,6 +585,11 @@ public class FanEntity extends Entity {
         Vec3d blowWay = Vec3d.fromPolar(this.getPitch(),getYaw()+getDegreeToBlow()).normalize().multiply((getRotationSpeed()/20f));
 
 
+        Optional<BlockPos> lavenderInterop = BlockPos.findClosest(this.getBlockPos(),3,3,blockPos -> {
+            return Bigfan.LAVENDER_CHECKER.get().test(world.getBlockState(blockPos).getBlock());
+        });
+
+        boolean isLavenderNearby = lavenderInterop.isPresent();
         if(getHitTimer()>0)setHitTimer(getHitTimer()-1);
         //System.out.println(getDegreeToBlow());
         age++;
@@ -625,6 +634,8 @@ public class FanEntity extends Entity {
             wind.setFanOwner(this.getId());
             wind.setFanRotSpd(getRotationSpeed());
             wind.setPosition(blowFrom.add(0f,0.75f,0f).add(blowWay.multiply(-0.75)));
+            if(isLavenderNearby)
+            wind.setSpecialParticle(1);
             if(this.isOnFire()) wind.setWindOnFire(true);
             wind.setFanPowerLevel(this.getFanPower());
             if(isBeingHeld()) wind.setFanHolder(getBeingHeldBy());

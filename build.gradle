@@ -17,6 +17,13 @@ repositories {
         name = 'TerraformersMC'
         url = 'https://maven.terraformersmc.com/'
     }
+    maven {
+        name = "Modrinth"
+        url = "https://api.modrinth.com/maven"
+        content {
+            includeGroup "maven.modrinth"
+        }
+    }
 }
 
 dependencies {
@@ -34,6 +41,9 @@ dependencies {
     modLocalRuntime("com.terraformersmc:modmenu:4.0.6") {
         exclude module: "fabric-api"
     }
+
+
+    modImplementation "maven.modrinth:aurorasdecorations:1.0.0-beta.6+1.19"
 }
 
 processResources {

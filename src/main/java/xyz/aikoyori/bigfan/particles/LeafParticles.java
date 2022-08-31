@@ -18,7 +18,7 @@ public class LeafParticles extends SpriteBillboardParticle {
     private float rotateSpeed = 0f;
     double ogScale;
     Random rand = new Random();
-    protected LeafParticles(ClientWorld clientWorld, double d, double e, double f, double velocityX, double velocityY, double velocityZ, SpriteProvider spriteProvider) {
+    protected LeafParticles(ClientWorld clientWorld, double d, double e, double f, double velocityX, double velocityY, double velocityZ, SpriteProvider spriteProvider,boolean tint) {
         super(clientWorld, d, e, f, 0.0, 0.0, 0.0);
         this.velocityMultiplier = 0.96F;
         this.spriteProvider = spriteProvider;
@@ -31,10 +31,13 @@ public class LeafParticles extends SpriteBillboardParticle {
         this.setSprite(spriteProvider);
         //float g = 1.0F - (float)(Math.random() * 0.30000001192092896);
 
-        int col = clientWorld.getBiome(new BlockPos(d,e,f)).value().getFoliageColor();
-        this.red = ColorHelper.Argb.getRed(col)/256.0f;
-        this.green = ColorHelper.Argb.getGreen(col)/256.0f;
-        this.blue = ColorHelper.Argb.getBlue(col)/256.0f;
+        if(tint)
+        {
+            int col = clientWorld.getBiome(new BlockPos(d,e,f)).value().getFoliageColor();
+            this.red = ColorHelper.Argb.getRed(col)/256.0f;
+            this.green = ColorHelper.Argb.getGreen(col)/256.0f;
+            this.blue = ColorHelper.Argb.getBlue(col)/256.0f;
+        }
         this.scale *= Math.random() * 0.8 + 0.7;
         ogScale = scale;
         int i = (int)(8.0 / (Math.random() * 0.8 + 0.3));
@@ -99,7 +102,19 @@ public class LeafParticles extends SpriteBillboardParticle {
         }
 
         public Particle createParticle(DefaultParticleType defaultParticleType, ClientWorld clientWorld, double d, double e, double f, double g, double h, double i) {
-            return new LeafParticles(clientWorld, d, e, f, g, h, i, this.spriteProvider);
+            return new LeafParticles(clientWorld, d, e, f, g, h, i, this.spriteProvider,true);
+        }
+    }
+    @Environment(EnvType.CLIENT)
+    public static class LavenderPetalsParticle implements ParticleFactory<DefaultParticleType> {
+        private final SpriteProvider spriteProvider;
+
+        public LavenderPetalsParticle(SpriteProvider spriteProvider) {
+            this.spriteProvider = spriteProvider;
+        }
+
+        public Particle createParticle(DefaultParticleType defaultParticleType, ClientWorld clientWorld, double d, double e, double f, double g, double h, double i) {
+            return new LeafParticles(clientWorld, d, e, f, g, h, i, this.spriteProvider,false);
         }
     }
 }
