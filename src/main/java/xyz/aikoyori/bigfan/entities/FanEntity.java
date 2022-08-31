@@ -624,7 +624,7 @@ public class FanEntity extends Entity {
             FanWindEntity wind = new FanWindEntity(Bigfan.FAN_WIND_ENTITY,world);
             wind.setFanOwner(this.getId());
             wind.setFanRotSpd(getRotationSpeed());
-            wind.setPosition(blowFrom.add(0f,0.75f,0f));
+            wind.setPosition(blowFrom.add(0f,0.75f,0f).add(blowWay.multiply(-0.75)));
             if(this.isOnFire()) wind.setWindOnFire(true);
             wind.setFanPowerLevel(this.getFanPower());
             if(isBeingHeld()) wind.setFanHolder(getBeingHeldBy());

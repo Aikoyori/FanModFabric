@@ -4,16 +4,20 @@ import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
 import net.minecraft.client.particle.*;
 import net.minecraft.client.world.ClientWorld;
+import net.minecraft.fluid.Fluids;
+import net.minecraft.fluid.LavaFluid;
 import net.minecraft.particle.DefaultParticleType;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.util.math.ColorHelper;
 import net.minecraft.util.math.MathHelper;
 
+import java.util.Random;
+
 public class LeafParticles extends SpriteBillboardParticle {
     private final SpriteProvider spriteProvider;
     private float rotateSpeed = 0f;
-
-
+    double ogScale;
+    Random rand = new Random();
     protected LeafParticles(ClientWorld clientWorld, double d, double e, double f, double velocityX, double velocityY, double velocityZ, SpriteProvider spriteProvider) {
         super(clientWorld, d, e, f, 0.0, 0.0, 0.0);
         this.velocityMultiplier = 0.96F;
@@ -32,11 +36,12 @@ public class LeafParticles extends SpriteBillboardParticle {
         this.green = ColorHelper.Argb.getGreen(col)/256.0f;
         this.blue = ColorHelper.Argb.getBlue(col)/256.0f;
         this.scale *= Math.random() * 0.8 + 0.7;
+        ogScale = scale;
         int i = (int)(8.0 / (Math.random() * 0.8 + 0.3));
         this.maxAge = (int)Math.max((float)i * 2.5F, 1.0F);
         this.collidesWithWorld = true;
         this.angle = (float) (Math.random()*MathHelper.PI)-MathHelper.HALF_PI;
-        this.rotateSpeed = (float) ((Math.random()*12.0f)+1.2f);
+        this.rotateSpeed = (rand.nextBoolean()?-1:1)*(float) ((Math.random()*12.0f)+1.2f);
     }
 
     @Override
@@ -47,7 +52,9 @@ public class LeafParticles extends SpriteBillboardParticle {
         this.prevPosZ = this.z;
         this.prevAngle = this.angle;
 
-        if (this.age++ >= this.maxAge) {
+
+        if (this.age++ >= this.maxAge || this.world.getFluidState(new BlockPos(x,y,z)).getFluid().matchesType(Fluids.LAVA)) {
+            this.scale = 0;
             this.markDead();
         }else {
             this.velocityY -= 0.04 * (double)this.gravityStrength;
@@ -70,7 +77,8 @@ public class LeafParticles extends SpriteBillboardParticle {
         if (!this.dead) {
             if(age/((float)(maxAge))>3/4.0)
             {
-                this.alpha = ((maxAge-age)/(maxAge*1f)*4);
+                //this.scale = (float) (ogScale*((maxAge-age)/(maxAge*1f)*4));
+                this.scale = this.scale*0.8f;
             }
             this.angle += ((float) (rotateSpeed* MathHelper.PI/360.0f));
         }

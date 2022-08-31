@@ -10,6 +10,10 @@ import net.minecraft.entity.data.TrackedData;
 import net.minecraft.entity.data.TrackedDataHandler;
 import net.minecraft.entity.data.TrackedDataHandlerRegistry;
 import net.minecraft.entity.projectile.ProjectileUtil;
+import net.minecraft.item.AutomaticItemPlacementContext;
+import net.minecraft.item.FireChargeItem;
+import net.minecraft.item.ItemStack;
+import net.minecraft.item.Items;
 import net.minecraft.nbt.NbtCompound;
 import net.minecraft.network.Packet;
 import net.minecraft.network.packet.s2c.play.EntitySpawnS2CPacket;
@@ -168,7 +172,7 @@ public class FanWindEntity extends Entity {
                             ,hitB.getBlockPos().getY()+hitB.getSide().getVector().getY()
                             ,hitB.getBlockPos().getZ()+hitB.getSide().getVector().getZ()
                     );
-                    world.setBlockState(sthin,Blocks.FIRE.getDefaultState());
+                    world.setBlockState(sthin,Blocks.FIRE.getPlacementState(new AutomaticItemPlacementContext(world,sthin,hitB.getSide(),new ItemStack(Items.FIRE_CHARGE),hitB.getSide())));
                 }
             }
 
