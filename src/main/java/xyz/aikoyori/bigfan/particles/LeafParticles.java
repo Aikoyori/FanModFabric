@@ -10,6 +10,7 @@ import net.minecraft.particle.DefaultParticleType;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.util.math.ColorHelper;
 import net.minecraft.util.math.MathHelper;
+import net.minecraft.util.math.Vec3d;
 
 import java.util.Random;
 
@@ -22,9 +23,9 @@ public class LeafParticles extends SpriteBillboardParticle {
         super(clientWorld, d, e, f, 0.0, 0.0, 0.0);
         this.velocityMultiplier = 0.96F;
         this.spriteProvider = spriteProvider;
-        this.velocityX *= 0.10000000149011612;
-        this.velocityY *= 0.10000000149011612;
-        this.velocityZ *= 0.10000000149011612;
+        this.velocityX *= 0.1;
+        this.velocityY *= 0.1;
+        this.velocityZ *= 0.1;
         this.velocityX += velocityX;
         this.velocityY += velocityY;
         this.velocityZ += velocityZ;
@@ -40,7 +41,7 @@ public class LeafParticles extends SpriteBillboardParticle {
         }
         this.scale *= Math.random() * 0.8 + 0.7;
         ogScale = scale;
-        int i = (int)(8.0 / (Math.random() * 0.8 + 0.3));
+        int i = (int)(8.0 / (Math.random() * 0.2 + 0.2));
         this.maxAge = (int)Math.max((float)i * 2.5F, 1.0F);
         this.collidesWithWorld = true;
         this.angle = (float) (Math.random()*MathHelper.PI)-MathHelper.HALF_PI;
@@ -78,12 +79,14 @@ public class LeafParticles extends SpriteBillboardParticle {
         }
 
         if (!this.dead) {
-            if(age/((float)(maxAge))>3/4.0)
+            if(age/((float)(maxAge))>7/8.0)
             {
-                //this.scale = (float) (ogScale*((maxAge-age)/(maxAge*1f)*4));
-                this.scale = this.scale*0.8f;
+                this.scale = (float) (ogScale*((maxAge-age)/(maxAge*1f)*8));
+                //this.scale = this.scale*0.8f;
             }
-            this.angle += ((float) (rotateSpeed* MathHelper.PI/360.0f));
+            if(!this.onGround) this.angle += ((float) (rotateSpeed* MathHelper.PI/360.0f));
+            if(!this.onGround) velocityY-=(0.001f*(1.0f/new Vec3d(this.velocityX,this.velocityY,this.velocityZ).length()));
+            this.move(this.velocityX, this.velocityY, this.velocityZ);
         }
 
     }

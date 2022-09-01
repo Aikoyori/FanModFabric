@@ -213,6 +213,11 @@ public class FanWindEntity extends Entity {
             {
                 setLife(0);
             }
+            else if(!world.getBlockState(bhr2.getBlockPos()).isAir() && !world.getBlockState(bhr3.getBlockPos()).isAir()){
+
+                this.setVelocity( this.getVelocity().multiply(0.8));
+            }
+
 
 
 
@@ -229,6 +234,8 @@ public class FanWindEntity extends Entity {
             {
 
                 hitE.getEntity().addVelocity(addVel.getX(),addVel.getY(),addVel.getZ());
+                this.setVelocity( this.getVelocity().multiply(0.75));
+
             }
             if(getWindOnFire())
             {
@@ -250,6 +257,7 @@ public class FanWindEntity extends Entity {
 
             //setLife(0);
         }
+        if(this.getVelocity().length()<0.01) this.setLife(0);
         if(getLife()<=0)
         {
             this.discard();
