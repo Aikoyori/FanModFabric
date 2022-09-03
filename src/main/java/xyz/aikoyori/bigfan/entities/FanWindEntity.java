@@ -100,6 +100,10 @@ public class FanWindEntity extends Entity {
     }
 
 
+    @Override
+    public boolean canUsePortals() {
+        return false;
+    }
 
     protected boolean canHit(Entity entity) {
         boolean xd = false;
@@ -226,17 +230,10 @@ public class FanWindEntity extends Entity {
         {
             EntityHitResult hitE = (EntityHitResult) hitResult;
             Vec3d addVel = new Vec3d(this.getVelocity().x,this.getVelocity().y,this.getVelocity().z).multiply(0.5);
-            if(getFanHolder()!=null && hitE.getEntity().getUuid().equals(getFanHolder()))
-            {
+            hitE.getEntity().addVelocity(addVel.getX(),addVel.getY(),addVel.getZ());
+            this.setVelocity( this.getVelocity().multiply(0.75));
 
-            }
-                else
-            {
 
-                hitE.getEntity().addVelocity(addVel.getX(),addVel.getY(),addVel.getZ());
-                this.setVelocity( this.getVelocity().multiply(0.75));
-
-            }
             if(getWindOnFire())
             {
                 hitE.getEntity().setFireTicks(20);
