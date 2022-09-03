@@ -31,6 +31,7 @@ import net.minecraft.util.math.Vec3d;
 import net.minecraft.world.World;
 import xyz.aikoyori.bigfan.Bigfan;
 
+import java.util.Objects;
 import java.util.UUID;
 
 import static xyz.aikoyori.bigfan.utils.FanHelper.getCollisionFromVector;
@@ -106,16 +107,8 @@ public class FanWindEntity extends Entity {
     }
 
     protected boolean canHit(Entity entity) {
-        boolean xd = false;
-        if(this.world.getEntityById(fanOwnerEnId) instanceof FanEntity fan && fan.isBeingHeld() && this.world.getEntityById(fan.getBeingHeldByClientSync()).equals(entity))
-        {
-            xd = true;
-        }
-        if (!entity.isSpectator() && !(entity instanceof FanEntity)&& !(entity instanceof FanWindEntity) && !(xd)) {
-            return true;
-        } else {
-            return false;
-        }
+        boolean xd = this.world.getEntityById(fanOwnerEnId) instanceof FanEntity fan && fan.isBeingHeld() && Objects.equals(this.world.getEntityById(fan.getBeingHeldByClientSync()), entity);
+        return !entity.isSpectator() && !(entity instanceof FanEntity) && !(entity instanceof FanWindEntity) && !(xd);
     }
 
 
