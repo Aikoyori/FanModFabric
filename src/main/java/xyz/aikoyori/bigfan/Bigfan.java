@@ -77,6 +77,9 @@ public class Bigfan implements ModInitializer {
         Registry.register(Registry.SOUND_EVENT, FAN_BUTTON_SWITCH, FAN_BUTTON_SWITCH_EVT);
         Registry.register(Registry.SOUND_EVENT, FAN_UNSWING_CLICK_ID, FAN_UNSWING_SNDEVT);
         Registry.register(Registry.SOUND_EVENT, FAN_POWEROFF_ID, FAN_POWEROFF_SNDEVT);
+        Registry.register(Registry.SOUND_EVENT, FAN_LOCKED_STATUS, FAN_LOCKED_STATUS_SNDEVT);
+        Registry.register(Registry.SOUND_EVENT, FAN_LOCKED_ID, FAN_LOCKED_SNDEVT);
+        Registry.register(Registry.SOUND_EVENT, FAN_UNLOCKED_ID, FAN_UNLOCKED_SNDEVT);
 
         if(FabricLoader.getInstance().isModLoaded("aurorasdeco"))
         {
