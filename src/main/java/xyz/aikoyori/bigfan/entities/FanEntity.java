@@ -316,10 +316,14 @@ public class FanEntity extends Entity {
         {
             return ActionResult.CONSUME;
         }
-        if(player instanceof ClientPlayerEntity s &&isLocked())
+        else if(player.world.isClient())
         {
-            return ActionResult.CONSUME;
+            if(player instanceof ClientPlayerEntity s &&isLocked())
+            {
+                return ActionResult.CONSUME;
+            }
         }
+
         if(player.getMainHandStack().isEmpty())
         {
             if(player.isSneaking())
