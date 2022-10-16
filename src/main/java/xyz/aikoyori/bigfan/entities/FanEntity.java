@@ -1,5 +1,6 @@
 package xyz.aikoyori.bigfan.entities;
 
+import net.minecraft.client.network.ClientPlayerEntity;
 import net.minecraft.entity.*;
 import net.minecraft.entity.damage.DamageSource;
 import net.minecraft.entity.data.DataTracker;
@@ -9,18 +10,22 @@ import net.minecraft.entity.player.PlayerEntity;
 import net.minecraft.entity.projectile.thrown.EnderPearlEntity;
 import net.minecraft.item.Item;
 import net.minecraft.item.ItemStack;
+import net.minecraft.item.Items;
 import net.minecraft.nbt.NbtCompound;
 import net.minecraft.network.Packet;
 import net.minecraft.network.packet.s2c.play.EntitySpawnS2CPacket;
 import net.minecraft.network.packet.s2c.play.EntityVelocityUpdateS2CPacket;
 import net.minecraft.server.network.ServerPlayerEntity;
 import net.minecraft.server.world.ServerWorld;
+import net.minecraft.sound.SoundCategory;
 import net.minecraft.sound.SoundEvents;
+import net.minecraft.text.Text;
 import net.minecraft.util.ActionResult;
 import net.minecraft.util.Hand;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.util.math.MathHelper;
 import net.minecraft.util.math.Vec3d;
+import net.minecraft.world.GameMode;
 import net.minecraft.world.GameRules;
 import net.minecraft.world.World;
 import org.jetbrains.annotations.Nullable;
@@ -42,6 +47,7 @@ public class FanEntity extends Entity {
     private static final TrackedData<Integer> HELD_BY_CLIENT_SYNC =  DataTracker.registerData(FanEntity.class, TrackedDataHandlerRegistry.INTEGER);
     private static final TrackedData<Integer> DAMAGE_TILT =  DataTracker.registerData(FanEntity.class, TrackedDataHandlerRegistry.INTEGER);
     private static final TrackedData<Integer> PREV_DMG_TILT =  DataTracker.registerData(FanEntity.class, TrackedDataHandlerRegistry.INTEGER);
+    private static final TrackedData<Boolean> LOCKED =  DataTracker.registerData(FanEntity.class, TrackedDataHandlerRegistry.BOOLEAN);
     private UUID heldBy;
 
     private final TrackedPosition trackedPosition;
@@ -100,6 +106,7 @@ public class FanEntity extends Entity {
         this.dataTracker.startTracking(HELD_BY_CLIENT_SYNC, -1);
         this.dataTracker.startTracking(DAMAGE_TILT, 0);
         this.dataTracker.startTracking(PREV_DMG_TILT, 0);
+        this.dataTracker.startTracking(LOCKED, false);
 
 
     }
@@ -109,6 +116,12 @@ public class FanEntity extends Entity {
     }
     public void setSwinging(boolean swing){
         getDataTracker().set(SWINGING,swing);
+    }
+    public boolean isLocked(){
+        return getDataTracker().get(LOCKED);
+    }
+    public void setLocked(boolean lock){
+        getDataTracker().set(LOCKED,lock);
     }
 
     public float getSwingSpeed(){
@@ -264,7 +277,7 @@ public class FanEntity extends Entity {
 
     @Override
     public boolean isPushable() {
-        return true;
+        return !isLocked();
     }
 
     @Override
@@ -275,10 +288,38 @@ public class FanEntity extends Entity {
     public float getDegreeToBlow(){
         return -((float)(MathHelper.sin(((float)((getSwingingProgress())*Math.PI*2.0f)))*(Math.PI/4.0f)))/(MathHelper.PI*2)*360.0f;
     }
+    boolean checkLocked(PlayerEntity player){
+        if(isLocked())
+        {
+            player.sendMessage(Text.translatable("bigfanofit.fan.isLocked", this.getDisplayName()), true);
+            player.playSound(Bigfan.FAN_LOCKED_STATUS_SNDEVT, this.getSoundCategory(), 0.4F, 1.0F);
+            return true;
+        }
+        return false;
+    }
     @Override
     public ActionResult interact(PlayerEntity player, Hand hand) {
 
         // TODO: LIFT UP FAN
+        if(player.getMainHandStack().getItem() == Items.IRON_INGOT)
+        {
+            if(player instanceof ServerPlayerEntity serv && (serv.interactionManager.getGameMode() != GameMode.SPECTATOR && serv.interactionManager.getGameMode() != GameMode.ADVENTURE))
+            {
+
+                this.setLocked(!this.isLocked());
+                this.playSound(this.isLocked()?Bigfan.FAN_LOCKED_SNDEVT:Bigfan.FAN_UNLOCKED_SNDEVT, 0.4f,isLocked()?0.5f:1.5f);
+                player.sendMessage(Text.translatable(isLocked()?"bigfanofit.fan.isNowLocked":"bigfanofit.fan.isNowUnlocked", this.getDisplayName()), true);
+            }
+            return ActionResult.SUCCESS;
+        }
+        if(player instanceof ServerPlayerEntity s && checkLocked(s))
+        {
+            return ActionResult.CONSUME;
+        }
+        if(player instanceof ClientPlayerEntity s &&isLocked())
+        {
+            return ActionResult.CONSUME;
+        }
         if(player.getMainHandStack().isEmpty())
         {
             if(player.isSneaking())
@@ -291,19 +332,23 @@ public class FanEntity extends Entity {
                 scrollFanNumber(1);
             return ActionResult.SUCCESS;
         }
+        else
+
 
 
         return super.interact(player, hand);
     }
 
+
     public boolean damage(DamageSource source, float amount) {
 
         if (!this.world.isClient && !this.isRemoved()) {
+
             if (this.isInvulnerableTo(source)) {
                 return false;
             } else {
                 //boolean bl = source.getAttacker() instanceof PlayerEntity && ((PlayerEntity)source.getAttacker()).getAbilities().creativeMode;
-                if (getHitTimer() > 20) {
+                if (getHitTimer() > 20 && !this.isLocked()) {
                     this.removeAllPassengers();
                     if (source.getAttacker()!=null && source.getAttacker() instanceof PlayerEntity atp && atp.getAbilities().creativeMode) {
                         this.discard();
@@ -319,6 +364,10 @@ public class FanEntity extends Entity {
 
 
                         if((source.getAttacker().isSneaking() && (source.getSource()!=null && source.getSource() instanceof PlayerEntity)) || (source.getSource()!=null && source.getSource() instanceof EnderPearlEntity)){
+                            if(checkLocked((PlayerEntity) source.getAttacker()))
+                            {
+                                return false;
+                            }
                             if(!isBeingHeld())
                             {
                                 setBeingHeld(true);
@@ -333,9 +382,10 @@ public class FanEntity extends Entity {
 
 
                             }
-                        }setHitTimer(getHitTimer()+9);
+                        }
+                        if(!this.isLocked()) setHitTimer(getHitTimer()+9);
                     }
-                    setHitTimer(getHitTimer()+2);
+                    if(!this.isLocked()) setHitTimer(getHitTimer()+2);
                 }
 
                 return true;
@@ -399,6 +449,7 @@ public class FanEntity extends Entity {
         getDataTracker().set(FAN_BLADE_ROTATION,nbt.getFloat("FanRotation"));
         getDataTracker().set(FAN_BLADE_ROTATION_SPEED,nbt.getFloat("FanRotationSpeed"));
         getDataTracker().set(FAN_BLADE_ROTATION_ACCELERATION,nbt.getFloat("FanRotationAccel"));
+        getDataTracker().set(LOCKED,nbt.getBoolean("Locked"));
         getDataTracker().set(IS_BEING_HELD,nbt.getBoolean("isBeingHeld"));
         try{
             getDataTracker().set(HELD_BY,Optional.of(nbt.getUuid("HeldBy")));
@@ -420,6 +471,7 @@ public class FanEntity extends Entity {
         nbt.putFloat("FanRotation",getDataTracker().get(FAN_BLADE_ROTATION));
         nbt.putFloat("FanRotationAccel",getDataTracker().get(FAN_BLADE_ROTATION_ACCELERATION));
         nbt.putBoolean("isBeingHeld",getDataTracker().get(IS_BEING_HELD));
+        nbt.putBoolean("Locked",getDataTracker().get(LOCKED));
         try{
             if(getDataTracker().get(HELD_BY)!=null)
                 nbt.putUuid("HeldBy",getDataTracker().get(HELD_BY).isPresent()?getDataTracker().get(HELD_BY).get():null);

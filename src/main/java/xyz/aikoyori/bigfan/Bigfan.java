@@ -59,6 +59,12 @@ public class Bigfan implements ModInitializer {
     public static SoundEvent FAN_SWING_SNDEVT = new SoundEvent(FAN_SWING_CLICK_ID);
     public static final Identifier FAN_UNSWING_CLICK_ID = new Identifier(MOD_ID,"fan_unswing_click");
     public static SoundEvent FAN_UNSWING_SNDEVT = new SoundEvent(FAN_UNSWING_CLICK_ID);
+    public static final Identifier FAN_LOCKED_STATUS = new Identifier(MOD_ID,"fan_is_locked_status");
+    public static SoundEvent FAN_LOCKED_STATUS_SNDEVT = new SoundEvent(FAN_LOCKED_STATUS);
+    public static final Identifier FAN_LOCKED_ID = new Identifier(MOD_ID,"fan_locked");
+    public static SoundEvent FAN_LOCKED_SNDEVT = new SoundEvent(FAN_LOCKED_ID);
+    public static final Identifier FAN_UNLOCKED_ID = new Identifier(MOD_ID,"fan_unlocked");
+    public static SoundEvent FAN_UNLOCKED_SNDEVT = new SoundEvent(FAN_UNLOCKED_ID);
 
     @Override
     public void onInitialize() {

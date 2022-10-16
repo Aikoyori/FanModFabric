@@ -56,5 +56,20 @@
       "bigfanofit:fanswingtoggleoff4",
       "bigfanofit:fanswingtoggleoff5"
     ]
+  },
+  "fan_is_locked_status": {
+    "sounds": [
+      "minecraft:random/anvil_land"
+    ]
+  },  "fan_locked": {
+  "subtitle": "subtitles.bigfanofit.fan_locked",
+    "sounds": [
+      "minecraft:random/anvil_land"
+    ]
+  },  "fan_unlocked": {
+  "subtitle": "subtitles.bigfanofit.fan_unlocked",
+    "sounds": [
+      "minecraft:random/anvil_land"
+    ]
   }
 }

@@ -3,5 +3,10 @@
   "entity.bigfanofit.fan_wind" : "Wind",
   "item.bigfanofit.fan" : "Fan",
   "subtitles.bigfanofit.fan_hum" : "Fan hums",
-  "subtitles.bigfanofit.fan_button_clicks" : "Fan button clicks"
+  "subtitles.bigfanofit.fan_button_clicks" : "Fan button clicks",
+  "subtitles.bigfanofit.fan_locked" : "Fan locked",
+  "subtitles.bigfanofit.fan_unlocked" : "Fan unlocked",
+  "bigfanofit.fan.isLocked": "%s is locked!",
+  "bigfanofit.fan.isNowLocked": "%s is now locked!",
+  "bigfanofit.fan.isNowUnlocked": "%s is now unlocked!"
 }

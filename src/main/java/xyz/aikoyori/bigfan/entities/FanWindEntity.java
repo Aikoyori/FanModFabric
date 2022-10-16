@@ -108,7 +108,7 @@ public class FanWindEntity extends Entity {
 
     protected boolean canHit(Entity entity) {
         boolean xd = this.world.getEntityById(fanOwnerEnId) instanceof FanEntity fan && fan.isBeingHeld() && Objects.equals(this.world.getEntityById(fan.getBeingHeldByClientSync()), entity);
-        return !entity.isSpectator() && !(entity instanceof FanEntity) && !(entity instanceof FanWindEntity) && !(xd);
+        return !entity.isSpectator( ) && !(entity instanceof FanEntity) && !(entity instanceof FanWindEntity) && !(xd);
     }
 
 
