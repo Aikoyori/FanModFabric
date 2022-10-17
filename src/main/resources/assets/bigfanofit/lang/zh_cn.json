@@ -1,0 +1,12 @@
+{
+  "entity.bigfanofit.fan": "风扇",
+  "entity.bigfanofit.fan_wind": "风",
+  "item.bigfanofit.fan": "风扇",
+  "subtitles.bigfanofit.fan_hum": "风扇厅",
+  "subtitles.bigfanofit.fan_button_clicks": "风扇按钮点击",
+  "subtitles.bigfanofit.fan_locked": "风扇已锁定",
+  "subtitles.bigfanofit.fan_unlocked": "风扇已解锁",
+  "bigfanofit.fan.isLocked": "%s 已被锁定！",
+  "bigfanofit.fan.isNowLocked": "%s 已被锁定！",
+  "bigfanofit.fan.isNowUnlocked": "%s 已解锁！"
+}
